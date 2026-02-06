@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'mihdan/cyr2lat',
-        'pretty_version' => '6.4.1',
-        'version' => '6.4.1.0',
-        'reference' => '234cab87aaacc62fd651746e36febd959b193b79',
+        'pretty_version' => '6.6.0',
+        'version' => '6.6.0.0',
+        'reference' => '22508139907ff6db0ba1868cfbcfebb112bb9b69',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'mihdan/cyr2lat' => array(
-            'pretty_version' => '6.4.1',
-            'version' => '6.4.1.0',
-            'reference' => '234cab87aaacc62fd651746e36febd959b193b79',
+            'pretty_version' => '6.6.0',
+            'version' => '6.6.0.0',
+            'reference' => '22508139907ff6db0ba1868cfbcfebb112bb9b69',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

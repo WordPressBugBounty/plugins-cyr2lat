@@ -244,7 +244,7 @@ class Main {
 
 		try {
 			/**
-			 * Method WP_CLI::add_command() accepts class as callable.
+			 * Method WP_CLI::add_command() accepts a class as callable.
 			 *
 			 * @noinspection PhpParamsInspection
 			 */
@@ -306,13 +306,9 @@ class Main {
 
 		if (
 			! $title ||
-			// Fixed bug with `_wp_old_slug` redirect.
+			// Fix the bug with `_wp_old_slug` redirect.
 			'query' === $context ||
-			// Transliterate on pre_term_slug with Polylang and WPML only.
-			(
-				doing_filter( 'pre_term_slug' ) &&
-				! ( class_exists( 'Polylang' ) || class_exists( 'SitePress' ) )
-			)
+			! $this->transliterate_on_pre_term_slug_filter( (string) $title )
 		) {
 			return $title;
 		}
@@ -359,7 +355,7 @@ class Main {
 
 	/**
 	 * WC before template part filter.
-	 * Add sanitize_title filter to support transliteration of WC attributes on frontend.
+	 * Add the sanitize_title filter to support transliteration of WC attributes on the frontend.
 	 *
 	 * @return void
 	 */
@@ -368,8 +364,8 @@ class Main {
 	}
 
 	/**
-	 * WC after template part filter.
-	 * Remove sanitize_title filter after supporting transliteration of WC attributes on frontend.
+	 * WC after the template part filter.
+	 * Remove the sanitize_title filter after supporting transliteration of WC attributes on the frontend.
 	 *
 	 * @return void
 	 */
@@ -455,15 +451,18 @@ class Main {
 	 * @noinspection ReturnTypeCanBeDeclaredInspection
 	 */
 	public function sanitize_filename( $filename, $filename_raw ) {
+		global $wp_version;
+
 		$pre = apply_filters( 'ctl_pre_sanitize_filename', false, $filename );
 
 		if ( false !== $pre ) {
-			return $pre;
+			return (string) $pre;
 		}
 
 		$filename = (string) $filename;
+		$is_utf8  = version_compare( $wp_version, '6.9-RC1', '>=' ) ? 'wp_is_valid_utf8' : 'seems_utf8';
 
-		if ( seems_utf8( $filename ) ) {
+		if ( $is_utf8( $filename ) ) {
 			$filename = (string) Mbstring::mb_strtolower( $filename );
 		}
 
@@ -545,7 +544,7 @@ class Main {
 
 	/**
 	 * Check if the Block Editor is active.
-	 * Must only be used after plugins_loaded action is fired.
+	 * Must only be used after the plugins_loaded action is fired.
 	 *
 	 * @return bool
 	 * @noinspection PhpUndefinedFunctionInspection
@@ -714,7 +713,7 @@ class Main {
 	}
 
 	/**
-	 * Locale filter for Polylang with classic editor.
+	 * Locale filter for Polylang with the classic editor.
 	 *
 	 * @return bool|string
 	 * @noinspection PhpUndefinedFunctionInspection
@@ -879,7 +878,7 @@ class Main {
 	}
 
 	/**
-	 * Changes array of items into string of items, separated by comma and sql-escaped
+	 * Changes an array of items into a string of items, separated by comma and sql-escaped.
 	 *
 	 * @see https://coderwall.com/p/zepnaw
 	 * @global wpdb       $wpdb
@@ -887,7 +886,7 @@ class Main {
 	 * @param mixed|array $items  item(s) to be joined into string.
 	 * @param string      $format %s or %d.
 	 *
-	 * @return string Items separated by comma and sql-escaped
+	 * @return string Items separated by comma and sql-escaped.
 	 */
 	public function prepare_in( $items, string $format = '%s' ): string {
 		global $wpdb;
@@ -904,5 +903,25 @@ class Main {
 		}
 
 		return $prepared_in;
+	}
+
+	/**
+	 * Check if we should transliterate the tag on pre_term_slug filter.
+	 *
+	 * @param string $title Title.
+	 *
+	 * @return bool
+	 */
+	protected function transliterate_on_pre_term_slug_filter( string $title ): bool {
+		global $wp_query;
+
+		$tag_var = $wp_query->query_vars['tag'] ?? null;
+
+		return ! (
+			$tag_var === $title &&
+			doing_filter( 'pre_term_slug' ) &&
+			// Transliterate on pre_term_slug with Polylang and WPML only.
+			! ( class_exists( 'Polylang' ) || class_exists( 'SitePress' ) )
+		);
 	}
 }
